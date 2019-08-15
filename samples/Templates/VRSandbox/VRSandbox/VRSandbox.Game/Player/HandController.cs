@@ -1,4 +1,4 @@
-﻿// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Linq;
@@ -33,6 +33,8 @@ namespace VRSandbox.Player
 
         private VRDeviceSystem vrDeviceSystem;
 
+        private AnalogHandAnimator analogHandAnimator;
+
         public override void Start()
         {
             base.Start();
@@ -40,6 +42,8 @@ namespace VRSandbox.Player
             vrDeviceSystem = Services.GetService<VRDeviceSystem>();
 
             animationComponent = Entity.FindChild("Entity")?.Get<AnimationComponent>();
+
+            analogHandAnimator = new AnalogHandAnimator(animationComponent, );
 
             // Assume Mars gravity for the sake of more enjoyable game
             this.GetSimulation().Gravity = new Vector3(0, -3.711f, 0);
@@ -84,6 +88,7 @@ namespace VRSandbox.Player
             {
                 if (animation != null)
                     animation.TimeFactor = 1.0f;
+                
 
                 GrabNewEntity();
             }
