@@ -38,6 +38,29 @@ namespace Xenko.VirtualReality
 
         public abstract TouchController RightHand { get; }
 
+        public virtual TouchController[] Controllers
+        {
+            get
+            {
+                if (LeftHand == null)
+                {
+                    if (RightHand == null)
+                    {
+                        return Array.Empty<TouchController>();
+                    }
+
+                    return new[] { RightHand };
+                }
+
+                if (RightHand == null)
+                {
+                    return new[] { LeftHand };
+                }
+
+                return new[] { LeftHand, RightHand };
+            }
+        }
+
         public abstract TrackedItem[] TrackedItems { get; }
 
         public VRApi VRApi { get; protected set; }

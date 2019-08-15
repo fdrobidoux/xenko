@@ -1,6 +1,7 @@
 using System;
 using Xenko.Animations;
 using Xenko.Engine;
+using Xenko.VirtualReality;
 
 namespace VRSandbox.Player
 {
@@ -9,7 +10,7 @@ namespace VRSandbox.Player
 
     }
 
-    public class AnalogHandAnimator
+    public class AnalogHandAnimator : SyncScript
     {
         float _maxFrame;
 
@@ -32,7 +33,7 @@ namespace VRSandbox.Player
             oldValue = _analogValueSelectorFn.Invoke();
         }
 
-        public void Update()
+        public override void Update()
         {
             float newValue = _analogValueSelectorFn.Invoke();
             float diff = newValue - oldValue;
@@ -48,7 +49,6 @@ namespace VRSandbox.Player
 
             playingAnim.TimeFactor = diff;
         }
-
     }
 
     
