@@ -154,7 +154,4 @@ fastlane/report.xml
 fastlane/screenshots
 *.user
 project.lock.json
-/samples/Templates/VRSandbox/.vs/VRSandbox/v15/Server/sqlite3/storage.ide-wal
-/samples/Templates/VRSandbox/.vs/VRSandbox/v15/Server/sqlite3/storage.ide-shm
-/samples/Templates/VRSandbox/.vs/VRSandbox/v15/Server/sqlite3/storage.ide
-/samples/Templates/VRSandbox/.vs/VRSandbox/v15/Server/sqlite3/db.lock
+samples/Templates/**/.vs/**
