@@ -67,6 +67,8 @@ namespace Xenko.Core.Quantum
         /// <param name="itemIndex">The index at which the new item must be added.</param>
         void Add(object newItem, NodeIndex itemIndex);
 
+        void Clear();
+
         /// <summary>
         /// Removes an item from this content, assuming the content is a collection.
         /// </summary>

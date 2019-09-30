@@ -5,5 +5,4 @@ using System.Runtime.CompilerServices;
 
 
 [assembly: InternalsVisibleTo("Xenko.Core.Assets.Quantum.Tests")]
-
-
+[assembly: InternalsVisibleTo("Xenko.Assets.Presentation")]
