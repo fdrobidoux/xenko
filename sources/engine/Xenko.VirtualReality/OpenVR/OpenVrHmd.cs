@@ -1,6 +1,6 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
-#if XENKO_GRAPHICS_API_DIRECT3D11
+#if XENKO_GRAPHICS_API_VULKAN || XENKO_GRAPHICS_API_DIRECT3D11
 
 using Xenko.Core.Mathematics;
 using Xenko.Games;
@@ -8,7 +8,7 @@ using Xenko.Graphics;
 
 namespace Xenko.VirtualReality
 {
-    internal class OpenVRHmd : VRDevice
+    public class OpenVRHmd : VRDevice
     {
         private RectangleF leftView = new RectangleF(0.0f, 0.0f, 0.5f, 1.0f);
         private RectangleF rightView = new RectangleF(0.5f, 0.0f, 1.0f, 1.0f);
@@ -25,25 +25,33 @@ namespace Xenko.VirtualReality
         private Vector3 currentHeadLinearVelocity;
         private Vector3 currentHeadAngularVelocity;
         private Quaternion currentHeadRot;
+        private GameBase mainGame;
+        private int HMDindex;
 
         public override bool CanInitialize => OpenVR.InitDone || OpenVR.Init();
 
-        public OpenVRHmd()
+        public OpenVRHmd(GameBase game)
         {
+            mainGame = game;
             VRApi = VRApi.OpenVR;
             SupportsOverlays = true;
         }
 
         public override void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, bool requireMirror, int mirrorWidth, int mirrorHeight)
         {
-            var width = (int)(OptimalRenderFrameSize.Width * RenderFrameScaling);
+            Size2 renderSize = OptimalRenderFrameSize;
+            var width = (int)(renderSize.Width * RenderFrameScaling);
             width += width % 2;
-            var height = (int)(OptimalRenderFrameSize.Height * RenderFrameScaling);
+            var height = (int)(renderSize.Height * RenderFrameScaling);
             height += height % 2;
 
             ActualRenderFrameSize = new Size2(width, height);
 
+#if XENKO_GRAPHICS_API_VULKAN
+            needsMirror = false; // Vulkan doesn't support mirrors :/
+#else
             needsMirror = requireMirror;
+#endif
 
             if (needsMirror)
             {
@@ -58,8 +66,16 @@ namespace Xenko.VirtualReality
             rightHandController = new OpenVRTouchController(TouchControllerHand.Right);
 
             trackedDevices = new OpenVRTrackedDevice[Valve.VR.OpenVR.k_unMaxTrackedDeviceCount];
-            for (int i=0; i<trackedDevices.Length; i++) 
+            for (int i = 0; i < trackedDevices.Length; i++) {
                 trackedDevices[i] = new OpenVRTrackedDevice(i);
+                if (trackedDevices[i].Class == DeviceClass.HMD) {
+                    HMDindex = i;
+                }
+            }
+
+#if XENKO_GRAPHICS_API_VULKAN
+            OpenVR.InitVulkan(mainGame);
+#endif
         }
 
         public override VROverlay CreateOverlay(int width, int height, int mipLevels, int sampleCount)
@@ -156,7 +172,18 @@ namespace Xenko.VirtualReality
 
         public override Size2 ActualRenderFrameSize { get; protected set; }
 
-        public override Size2 OptimalRenderFrameSize => new Size2(2160, 1200);
+        public override Size2 OptimalRenderFrameSize {
+            get {
+                uint width = 0, height = 0;
+                Valve.VR.OpenVR.System.GetRecommendedRenderTargetSize(ref width, ref height);
+                return new Size2((int)width, (int)height);
+            }
+        }
+
+        public float RefreshRate() {
+            Valve.VR.ETrackedPropertyError err = default;
+            return Valve.VR.OpenVR.System.GetFloatTrackedDeviceProperty((uint)HMDindex, Valve.VR.ETrackedDeviceProperty.Prop_DisplayFrequency_Float, ref err);
+        }
 
         public override void Dispose()
         {
